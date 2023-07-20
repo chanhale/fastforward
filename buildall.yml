@@ -1,0 +1,30 @@
+- hosts: all
+  gather_facts: no
+  connection: ansible.netcommon.network_cli
+  vars_files: vars/vars_pod#.yaml
+  
+  tasks:
+    - name: Apply Core Base Configuration
+      when: inventory_hostname in groups['core']
+      cisco.ios.ios_config:
+        src: "~/ansible_lab/templates/core_config.j2"
+        save_when: changed
+
+    - name: Apply Access Base Configuration
+      when: inventory_hostname in groups['access']
+      cisco.ios.ios_config:
+        src: "~/ansible_lab/templates/access_config.j2"
+        save_when: changed
+
+    - name: Apply Access MDT Configuration
+      when: inventory_hostname in groups['access']
+      cisco.ios.ios_config:
+        src: "~/ansible_lab/templates/telemetry_config.j2"
+        save_when: changed
+
+    - name: Modify Router Hostname
+      when: inventory_hostname in groups['wan']
+      cisco.ios.ios_hostname:
+        config:
+          hostname: "{{ router_hostname }}"
+        state: replaced 
